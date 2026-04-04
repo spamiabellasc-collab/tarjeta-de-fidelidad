@@ -1,12 +1,352 @@
 @import "tailwindcss";
 
+html {
+  width: 100%;
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   font-family: Inter, system-ui, sans-serif;
   background: #fff9f8;
   color: #2e2323;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
 }
 
 * {
   box-sizing: border-box;
+  min-width: 0;
+}
+
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a,
+button {
+  touch-action: manipulation;
+}
+
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  vertical-align: top;
+}
+
+:where(main, section, article, aside, header, footer, div) {
+  min-width: 0;
+}
+
+/* =========================
+   PATCH RESPONSIVE GLOBAL
+   sin cambiar colores
+   ========================= */
+
+/* Layouts y wrappers comunes */
+.layout,
+.app-layout,
+.page-layout,
+.dashboard-layout,
+.shell,
+.container,
+.page-container,
+.content-container,
+.main-container,
+.main-content,
+.page-content,
+.dashboard-content,
+.section-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Espaciado general para móvil/tablet */
+.page-container,
+.content-container,
+.main-container,
+.main-content,
+.page-content,
+.dashboard-content,
+.section-content {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Headers y barras de acciones */
+.page-header,
+.dashboard-header,
+.section-header,
+.header-row,
+.actions-row,
+.header-actions,
+.top-actions,
+.filters-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Grids comunes */
+.dashboard-grid,
+.stats-grid,
+.cards-grid,
+.quick-actions-grid,
+.menu-grid,
+.actions-grid,
+.clientes-grid,
+.premios-grid,
+.resumen-grid,
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Formularios */
+.form-grid,
+.form-row,
+.filters-grid,
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-grid .full,
+.form-row .full,
+.filters-grid .full,
+.search-grid .full {
+  grid-column: 1 / -1;
+}
+
+/* Cards */
+.card,
+.metric-card,
+.stat-card,
+.client-card,
+.reward-card,
+.action-card,
+.dashboard-card {
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* Botones */
+.button-row,
+.actions-row,
+.header-actions,
+.card-actions,
+.form-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.button-row > *,
+.actions-row > *,
+.header-actions > *,
+.card-actions > *,
+.form-actions > * {
+  min-height: 44px;
+}
+
+/* Tablas y contenedores con posible overflow */
+.table-wrap,
+.table-container,
+.responsive-table,
+.overflow-table {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-wrap table,
+.table-container table,
+.responsive-table table,
+.overflow-table table {
+  min-width: 640px;
+}
+
+/* Textos largos */
+p,
+span,
+small,
+strong,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* =========================
+   TABLET
+   ========================= */
+@media (max-width: 1024px) {
+  .page-container,
+  .content-container,
+  .main-container,
+  .main-content,
+  .page-content,
+  .dashboard-content,
+  .section-content {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .dashboard-grid,
+  .stats-grid,
+  .cards-grid,
+  .quick-actions-grid,
+  .menu-grid,
+  .actions-grid,
+  .clientes-grid,
+  .premios-grid,
+  .resumen-grid,
+  .config-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================
+   MOBILE
+   ========================= */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .page-container,
+  .content-container,
+  .main-container,
+  .main-content,
+  .page-content,
+  .dashboard-content,
+  .section-content {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .page-header,
+  .dashboard-header,
+  .section-header,
+  .header-row,
+  .actions-row,
+  .header-actions,
+  .top-actions,
+  .filters-row,
+  .button-row,
+  .card-actions,
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .button-row > *,
+  .actions-row > *,
+  .header-actions > *,
+  .card-actions > *,
+  .form-actions > * {
+    width: 100%;
+  }
+
+  .dashboard-grid,
+  .stats-grid,
+  .cards-grid,
+  .quick-actions-grid,
+  .menu-grid,
+  .actions-grid,
+  .clientes-grid,
+  .premios-grid,
+  .resumen-grid,
+  .config-grid,
+  .form-grid,
+  .form-row,
+  .filters-grid,
+  .search-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .table-wrap table,
+  .table-container table,
+  .responsive-table table,
+  .overflow-table table {
+    min-width: 560px;
+  }
+}
+
+/* =========================
+   MOBILE PEQUEÑO
+   ========================= */
+@media (max-width: 480px) {
+  .page-container,
+  .content-container,
+  .main-container,
+  .main-content,
+  .page-content,
+  .dashboard-content,
+  .section-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .dashboard-grid,
+  .stats-grid,
+  .cards-grid,
+  .quick-actions-grid,
+  .menu-grid,
+  .actions-grid,
+  .clientes-grid,
+  .premios-grid,
+  .resumen-grid,
+  .config-grid,
+  .form-grid,
+  .form-row,
+  .filters-grid,
+  .search-grid {
+    gap: 10px;
+  }
 }

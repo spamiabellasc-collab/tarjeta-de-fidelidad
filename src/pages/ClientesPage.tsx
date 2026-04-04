@@ -59,28 +59,32 @@ export default function ClientesPage() {
   }, [profile?.empresa_id]);
 
   const clientesFiltrados = clientes.filter((c) =>
-    `${c.nombre_completo} ${c.telefono}`.toLowerCase().includes(busqueda.toLowerCase())
+    `${c.nombre_completo} ${c.telefono}`
+      .toLowerCase()
+      .includes(busqueda.toLowerCase())
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-[#4a3535]">Clientes</h1>
-        <p className="text-[#8b6f6f] mt-1">
+    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#4a3535]">
+          Clientes
+        </h1>
+        <p className="text-sm sm:text-base text-[#8b6f6f]">
           Busca, edita y administra todos tus clientes
         </p>
       </div>
 
-      <div className="rounded-3xl bg-white border border-[#ead6d6] p-5">
+      <div className="rounded-3xl bg-white border border-[#ead6d6] p-4 sm:p-5">
         <input
           placeholder="Buscar por nombre o número"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          className="w-full rounded-2xl border px-4 py-3"
+          className="w-full rounded-2xl border border-[#ead6d6] px-4 py-3 text-sm sm:text-base outline-none"
         />
       </div>
 
-      <div className="rounded-3xl bg-white border border-[#ead6d6] p-5 space-y-3">
+      <div className="rounded-3xl bg-white border border-[#ead6d6] p-4 sm:p-5 space-y-3">
         {loading ? (
           <p className="text-[#8b6f6f]">Cargando...</p>
         ) : clientesFiltrados.length === 0 ? (
@@ -89,32 +93,36 @@ export default function ClientesPage() {
           clientesFiltrados.map((cliente) => (
             <div
               key={cliente.id}
-              className="flex items-center justify-between rounded-2xl border p-4"
+              className="rounded-2xl border border-[#ead6d6] p-4"
             >
-              <div>
-                <p className="font-semibold text-[#4a3535]">
-                  {cliente.nombre_completo}
-                </p>
-                <p className="text-sm text-[#8b6f6f]">{cliente.telefono}</p>
-                <p className="text-xs text-[#8b6f6f]">
-                  Sellos: {cliente.sellos_actuales}
-                </p>
-              </div>
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="min-w-0">
+                  <p className="font-semibold text-[#4a3535] break-words">
+                    {cliente.nombre_completo}
+                  </p>
+                  <p className="text-sm text-[#8b6f6f] break-all">
+                    {cliente.telefono}
+                  </p>
+                  <p className="text-xs text-[#8b6f6f]">
+                    Sellos: {cliente.sellos_actuales}
+                  </p>
+                </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => navigate(`/clientes/${cliente.id}`)}
-                  className="px-4 py-2 rounded-xl bg-[#d9aeb2] text-white text-sm"
-                >
-                  Ver
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                  <button
+                    onClick={() => navigate(`/clientes/${cliente.id}`)}
+                    className="w-full md:w-auto px-4 py-2.5 rounded-xl bg-[#d9aeb2] text-white text-sm font-medium"
+                  >
+                    Ver
+                  </button>
 
-                <button
-                  onClick={() => handleEliminar(cliente.id)}
-                  className="px-4 py-2 rounded-xl border text-sm"
-                >
-                  Eliminar
-                </button>
+                  <button
+                    onClick={() => handleEliminar(cliente.id)}
+                    className="w-full md:w-auto px-4 py-2.5 rounded-xl border border-[#ead6d6] text-sm font-medium text-[#4a3535]"
+                  >
+                    Eliminar
+                  </button>
+                </div>
               </div>
             </div>
           ))

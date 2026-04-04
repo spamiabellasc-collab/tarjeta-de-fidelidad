@@ -162,15 +162,17 @@ Será un gusto atenderte nuevamente 💖`;
   }
 
   return (
-    <div className="space-y-6">
-      <section>
-        <h1 className="text-3xl font-bold text-[#4a3535]">Dashboard</h1>
-        <p className="text-[#8b6f6f] mt-1">
+    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+      <section className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#4a3535]">
+          Dashboard
+        </h1>
+        <p className="text-sm sm:text-base text-[#8b6f6f]">
           Resumen general de tu programa de fidelidad
         </p>
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           title="Cantidad de clientes"
           value={loading ? "..." : clientes.length}
@@ -197,9 +199,9 @@ Será un gusto atenderte nuevamente 💖`;
         />
       </section>
 
-      <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="rounded-3xl bg-white border border-[#ead6d6] p-5">
-          <h2 className="text-lg font-semibold text-[#4a3535]">
+      <section className="grid grid-cols-1 xl:grid-cols-3 gap-3 sm:gap-4">
+        <div className="rounded-3xl bg-white border border-[#ead6d6] p-4 sm:p-5 min-w-0">
+          <h2 className="text-base sm:text-lg font-semibold text-[#4a3535]">
             Cumpleaños del día
           </h2>
 
@@ -212,12 +214,12 @@ Será un gusto atenderte nuevamente 💖`;
               cumpleanosHoy.map((cliente) => (
                 <div
                   key={cliente.id}
-                  className="rounded-2xl border border-[#ead6d6] p-3"
+                  className="rounded-2xl border border-[#ead6d6] p-3 min-w-0"
                 >
-                  <p className="font-semibold text-[#4a3535]">
+                  <p className="font-semibold text-[#4a3535] break-words">
                     {cliente.nombre_completo}
                   </p>
-                  <p className="text-sm text-[#8b6f6f]">
+                  <p className="text-sm text-[#8b6f6f] break-all">
                     {cliente.telefono || "Sin teléfono"}
                   </p>
 
@@ -229,7 +231,7 @@ Será un gusto atenderte nuevamente 💖`;
                           cliente.nombre_completo
                         )
                       }
-                      className="mt-3 rounded-xl bg-[#d9aeb2] px-4 py-2 text-sm font-semibold text-white"
+                      className="mt-3 w-full sm:w-auto rounded-xl bg-[#d9aeb2] px-4 py-2.5 text-sm font-semibold text-white"
                     >
                       Enviar WhatsApp
                     </button>
@@ -240,8 +242,8 @@ Será un gusto atenderte nuevamente 💖`;
           </div>
         </div>
 
-        <div className="rounded-3xl bg-white border border-[#ead6d6] p-5">
-          <h2 className="text-lg font-semibold text-[#4a3535]">
+        <div className="rounded-3xl bg-white border border-[#ead6d6] p-4 sm:p-5 min-w-0">
+          <h2 className="text-base sm:text-lg font-semibold text-[#4a3535]">
             Clientes con premio próximo
           </h2>
 
@@ -254,12 +256,12 @@ Será un gusto atenderte nuevamente 💖`;
               clientesPremioProximo.slice(0, 5).map((cliente) => (
                 <div
                   key={cliente.id}
-                  className="rounded-2xl border border-[#ead6d6] p-3"
+                  className="rounded-2xl border border-[#ead6d6] p-3 min-w-0"
                 >
-                  <p className="font-semibold text-[#4a3535]">
+                  <p className="font-semibold text-[#4a3535] break-words">
                     {cliente.nombre_completo}
                   </p>
-                  <p className="text-sm text-[#8b6f6f]">
+                  <p className="text-sm text-[#8b6f6f] break-words">
                     Premio: {cliente.premio_nombre}
                   </p>
                   <p className="text-sm text-[#8b6f6f]">
@@ -276,7 +278,7 @@ Será un gusto atenderte nuevamente 💖`;
                           cliente.sellos_faltantes
                         )
                       }
-                      className="mt-3 rounded-xl bg-[#4a3535] px-4 py-2 text-sm font-semibold text-white"
+                      className="mt-3 w-full sm:w-auto rounded-xl bg-[#4a3535] px-4 py-2.5 text-sm font-semibold text-white"
                     >
                       Enviar promoción
                     </button>
@@ -287,8 +289,8 @@ Será un gusto atenderte nuevamente 💖`;
           </div>
         </div>
 
-        <div className="rounded-3xl bg-white border border-[#ead6d6] p-5">
-          <h2 className="text-lg font-semibold text-[#4a3535]">
+        <div className="rounded-3xl bg-white border border-[#ead6d6] p-4 sm:p-5 min-w-0">
+          <h2 className="text-base sm:text-lg font-semibold text-[#4a3535]">
             Clientes inactivos
           </h2>
 
@@ -301,12 +303,12 @@ Será un gusto atenderte nuevamente 💖`;
               clientesInactivos.slice(0, 5).map((cliente) => (
                 <div
                   key={cliente.id}
-                  className="rounded-2xl border border-[#ead6d6] p-3"
+                  className="rounded-2xl border border-[#ead6d6] p-3 min-w-0"
                 >
-                  <p className="font-semibold text-[#4a3535]">
+                  <p className="font-semibold text-[#4a3535] break-words">
                     {cliente.nombre_completo}
                   </p>
-                  <p className="text-sm text-[#8b6f6f]">
+                  <p className="text-sm text-[#8b6f6f] break-words">
                     Última visita: {formatearFecha(cliente.ultima_visita_at)}
                   </p>
                   <p className="text-sm text-[#8b6f6f]">
@@ -322,7 +324,7 @@ Será un gusto atenderte nuevamente 💖`;
                           cliente.dias_inactivo
                         )
                       }
-                      className="mt-3 rounded-xl border border-[#ead6d6] px-4 py-2 text-sm font-semibold text-[#4a3535]"
+                      className="mt-3 w-full sm:w-auto rounded-xl border border-[#ead6d6] px-4 py-2.5 text-sm font-semibold text-[#4a3535]"
                     >
                       Recontactar por WhatsApp
                     </button>
