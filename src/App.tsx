@@ -15,6 +15,7 @@ import PremiosPage from "./pages/PremiosPage";
 import ConfiguracionPage from "./pages/ConfiguracionPage";
 import UsuariosPage from "./pages/UsuariosPage";
 import TarjetaPublicaPage from "./pages/TarjetaPublicaPage";
+import RegistroClientePublicoPage from "./pages/RegistroClientePublicoPage";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/tarjeta/:id" element={<TarjetaPublicaPage />} />
+        <Route path="/registro/:slug" element={<RegistroClientePublicoPage />} />
 
         <Route
           element={
