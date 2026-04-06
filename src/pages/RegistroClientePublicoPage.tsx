@@ -108,7 +108,6 @@ export default function RegistroClientePublicoPage() {
     }
 
     if (clienteExistente?.id) {
-      setGuardando(false);
       navigate(`/tarjeta/${clienteExistente.id}`);
       return;
     }

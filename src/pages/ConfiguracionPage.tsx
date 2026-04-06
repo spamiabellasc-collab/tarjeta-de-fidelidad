@@ -51,14 +51,15 @@ Te saludamos de {{empresa}}. Hace {{dias}} días que no nos visitas y queremos i
 
 Será un gusto atenderte nuevamente 💖`;
 
-function limpiarSlug(valor: string) {
-  return valor
+function slugify(value: string) {
+  return value
     .toLowerCase()
+    .trim()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 export default function ConfiguracionPage() {
@@ -128,15 +129,9 @@ export default function ConfiguracionPage() {
       setIconoSello(empresaFinal.icono_sello || "✿");
     }
 
-    setTemplateCumple(
-      configFinal?.whatsapp_cumple_template || defaultCumple
-    );
-    setTemplatePremio(
-      configFinal?.whatsapp_premio_template || defaultPremio
-    );
-    setTemplateInactivo(
-      configFinal?.whatsapp_inactivo_template || defaultInactivo
-    );
+    setTemplateCumple(configFinal?.whatsapp_cumple_template || defaultCumple);
+    setTemplatePremio(configFinal?.whatsapp_premio_template || defaultPremio);
+    setTemplateInactivo(configFinal?.whatsapp_inactivo_template || defaultInactivo);
 
     setCargandoEmpresa(false);
   }
@@ -147,7 +142,6 @@ export default function ConfiguracionPage() {
 
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-
     if (!file) return;
 
     if (!empresa?.id) {
@@ -181,10 +175,10 @@ export default function ConfiguracionPage() {
       return;
     }
 
-    const slugLimpio = limpiarSlug(slug);
+    const slugFinal = slugify(slug || nombreComercial || nombre);
 
-    if (!slugLimpio) {
-      alert("Debes ingresar un slug válido para el link de registro");
+    if (!slugFinal) {
+      alert("El slug no puede quedar vacío");
       return;
     }
 
@@ -196,7 +190,7 @@ export default function ConfiguracionPage() {
         nombre_comercial: nombreComercial || null,
         nombre_tarjeta: nombreTarjeta || null,
         telefono: telefono || null,
-        slug: slugLimpio,
+        slug: slugFinal,
         color_primario: colorPrimario || null,
         color_secundario: colorSecundario || null,
         logo_url: logoUrl || null,
@@ -222,7 +216,6 @@ export default function ConfiguracionPage() {
     }
 
     alert("Configuración guardada correctamente");
-    setSlug(slugLimpio);
     await cargarEmpresa();
   }
 
@@ -244,7 +237,10 @@ export default function ConfiguracionPage() {
     dias: 18,
   });
 
-  const slugPreview = useMemo(() => limpiarSlug(slug), [slug]);
+  const slugPreview = useMemo(
+    () => slugify(slug || nombreComercial || nombre),
+    [slug, nombreComercial, nombre]
+  );
 
   const linkRegistro = slugPreview
     ? `${window.location.origin}/registro/${slugPreview}`
@@ -252,7 +248,7 @@ export default function ConfiguracionPage() {
 
   async function generarQR() {
     if (!linkRegistro) {
-      alert("Primero debes ingresar un slug válido.");
+      alert("No se pudo generar el link de registro.");
       return;
     }
 
@@ -283,8 +279,7 @@ export default function ConfiguracionPage() {
       <div>
         <h1 className="text-3xl font-bold text-[#4a3535]">Configuración</h1>
         <p className="text-[#8b6f6f] mt-1">
-          Personaliza los datos visuales, logo, sellos, link de registro y
-          mensajes de WhatsApp
+          Personaliza los datos visuales, logo, sellos, link de registro y mensajes de WhatsApp
         </p>
       </div>
 
@@ -322,27 +317,15 @@ export default function ConfiguracionPage() {
             className="rounded-2xl border border-[#e8d5d5] px-4 py-3 outline-none"
           />
 
-          <div className="md:col-span-2 rounded-2xl border border-[#e8d5d5] px-4 py-4">
-            <label className="block text-sm font-medium text-[#4a3535] mb-2">
-              Link de registro (slug)
-            </label>
+          <input
+            placeholder="Slug público (ej: miabella)"
+            value={slug}
+            onChange={(e) => setSlug(slugify(e.target.value))}
+            className="rounded-2xl border border-[#e8d5d5] px-4 py-3 outline-none"
+          />
 
-            <input
-              placeholder="Ejemplo: miabella"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              className="w-full rounded-2xl border border-[#e8d5d5] px-4 py-3 outline-none"
-            />
-
-            <p className="text-xs text-[#8b6f6f] mt-2">
-              Usa solo letras, números y guiones. Ejemplo:
-              {" "}
-              <span className="font-semibold">miabella</span>
-            </p>
-
-            <div className="mt-3 rounded-2xl border border-[#ead6d6] bg-[#fff7f7] px-4 py-3 text-sm text-[#4a3535] break-all">
-              {linkRegistro || "Ingresa un slug para generar el link"}
-            </div>
+          <div className="rounded-2xl border border-[#e8d5d5] px-4 py-3 flex items-center text-sm text-[#8b6f6f]">
+            Vista previa: {slugPreview || "sin-slug"}
           </div>
 
           <div className="rounded-2xl border border-[#e8d5d5] px-4 py-3">
@@ -422,8 +405,7 @@ export default function ConfiguracionPage() {
         </h2>
 
         <p className="text-sm text-[#8b6f6f]">
-          Comparte este link para que tus clientes se registren solos y obtengan
-          su tarjeta digital.
+          Comparte este link para que tus clientes se registren solos y obtengan su tarjeta digital
         </p>
 
         <div className="rounded-2xl border border-[#ead6d6] px-4 py-3 text-sm text-[#4a3535] break-all bg-[#fff7f7]">
@@ -460,8 +442,7 @@ export default function ConfiguracionPage() {
         </h2>
 
         <p className="text-sm text-[#8b6f6f]">
-          Genera este QR para imprimirlo y colocarlo en tu negocio. Así los
-          clientes pueden registrarse solos.
+          Genera este QR para imprimirlo y colocarlo en tu negocio. Así los clientes pueden registrarse solos.
         </p>
 
         <div>
@@ -516,8 +497,7 @@ export default function ConfiguracionPage() {
               className="w-full rounded-2xl border border-[#e8d5d5] px-4 py-3 outline-none"
             />
             <p className="text-xs text-[#8b6f6f] mt-2">
-              Variables: {"{{nombre}}"}, {"{{empresa}}"}, {"{{faltan}}"},{" "}
-              {"{{premio}}"}
+              Variables: {"{{nombre}}"}, {"{{empresa}}"}, {"{{faltan}}"}, {"{{premio}}"}
             </p>
           </div>
 
