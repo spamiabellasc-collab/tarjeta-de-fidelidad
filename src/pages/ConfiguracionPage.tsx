@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import QRCode from "qrcode";
 import { useAuth } from "../features/auth/AuthContext";
 import {
   actualizarEmpresa,
@@ -19,6 +20,7 @@ type Empresa = {
   color_secundario: string | null;
   logo_url: string | null;
   icono_sello: string | null;
+  slug: string | null;
 };
 
 type ConfigEmpresa = {
@@ -49,6 +51,16 @@ Te saludamos de {{empresa}}. Hace {{dias}} días que no nos visitas y queremos i
 
 Será un gusto atenderte nuevamente 💖`;
 
+function limpiarSlug(valor: string) {
+  return valor
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export default function ConfiguracionPage() {
   const { profile } = useAuth();
 
@@ -57,6 +69,7 @@ export default function ConfiguracionPage() {
   const [nombreComercial, setNombreComercial] = useState("");
   const [nombreTarjeta, setNombreTarjeta] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [slug, setSlug] = useState("");
   const [colorPrimario, setColorPrimario] = useState("#D9AEB2");
   const [colorSecundario, setColorSecundario] = useState("#F4E7E7");
   const [logoUrl, setLogoUrl] = useState("");
@@ -69,6 +82,7 @@ export default function ConfiguracionPage() {
   const [loading, setLoading] = useState(false);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
   const [cargandoEmpresa, setCargandoEmpresa] = useState(true);
+  const [qrUrl, setQrUrl] = useState("");
 
   async function cargarEmpresa() {
     if (!profile?.empresa_id) {
@@ -107,6 +121,7 @@ export default function ConfiguracionPage() {
       setNombreComercial(empresaFinal.nombre_comercial || "");
       setNombreTarjeta(empresaFinal.nombre_tarjeta || "Tarjeta de fidelidad");
       setTelefono(empresaFinal.telefono || "");
+      setSlug(empresaFinal.slug || "");
       setColorPrimario(empresaFinal.color_primario || "#D9AEB2");
       setColorSecundario(empresaFinal.color_secundario || "#F4E7E7");
       setLogoUrl(empresaFinal.logo_url || "");
@@ -166,6 +181,13 @@ export default function ConfiguracionPage() {
       return;
     }
 
+    const slugLimpio = limpiarSlug(slug);
+
+    if (!slugLimpio) {
+      alert("Debes ingresar un slug válido para el link de registro");
+      return;
+    }
+
     setLoading(true);
 
     const [{ error: errorEmpresa }, { error: errorConfig }] = await Promise.all([
@@ -174,6 +196,7 @@ export default function ConfiguracionPage() {
         nombre_comercial: nombreComercial || null,
         nombre_tarjeta: nombreTarjeta || null,
         telefono: telefono || null,
+        slug: slugLimpio,
         color_primario: colorPrimario || null,
         color_secundario: colorSecundario || null,
         logo_url: logoUrl || null,
@@ -199,22 +222,8 @@ export default function ConfiguracionPage() {
     }
 
     alert("Configuración guardada correctamente");
+    setSlug(slugLimpio);
     await cargarEmpresa();
-  }
-
-  if (cargandoEmpresa) {
-    return <div className="text-[#8b6f6f]">Cargando empresa...</div>;
-  }
-
-  if (!empresa) {
-    return (
-      <div className="rounded-3xl bg-white border border-[#ead6d6] p-6">
-        <h1 className="text-2xl font-bold text-[#4a3535]">Configuración</h1>
-        <p className="text-[#8b6f6f] mt-2">
-          No se encontró la empresa.
-        </p>
-      </div>
-    );
   }
 
   const previewCumple = reemplazarVariablesTemplate(templateCumple, {
@@ -235,12 +244,47 @@ export default function ConfiguracionPage() {
     dias: 18,
   });
 
+  const slugPreview = useMemo(() => limpiarSlug(slug), [slug]);
+
+  const linkRegistro = slugPreview
+    ? `${window.location.origin}/registro/${slugPreview}`
+    : "";
+
+  async function generarQR() {
+    if (!linkRegistro) {
+      alert("Primero debes ingresar un slug válido.");
+      return;
+    }
+
+    try {
+      const url = await QRCode.toDataURL(linkRegistro);
+      setQrUrl(url);
+    } catch (error) {
+      console.error("Error generando QR:", error);
+      alert("No se pudo generar el QR");
+    }
+  }
+
+  if (cargandoEmpresa) {
+    return <div className="text-[#8b6f6f]">Cargando empresa...</div>;
+  }
+
+  if (!empresa) {
+    return (
+      <div className="rounded-3xl bg-white border border-[#ead6d6] p-6">
+        <h1 className="text-2xl font-bold text-[#4a3535]">Configuración</h1>
+        <p className="text-[#8b6f6f] mt-2">No se encontró la empresa.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-[#4a3535]">Configuración</h1>
         <p className="text-[#8b6f6f] mt-1">
-          Personaliza los datos visuales, logo, sellos y mensajes de WhatsApp
+          Personaliza los datos visuales, logo, sellos, link de registro y
+          mensajes de WhatsApp
         </p>
       </div>
 
@@ -277,6 +321,29 @@ export default function ConfiguracionPage() {
             onChange={(e) => setTelefono(e.target.value)}
             className="rounded-2xl border border-[#e8d5d5] px-4 py-3 outline-none"
           />
+
+          <div className="md:col-span-2 rounded-2xl border border-[#e8d5d5] px-4 py-4">
+            <label className="block text-sm font-medium text-[#4a3535] mb-2">
+              Link de registro (slug)
+            </label>
+
+            <input
+              placeholder="Ejemplo: miabella"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              className="w-full rounded-2xl border border-[#e8d5d5] px-4 py-3 outline-none"
+            />
+
+            <p className="text-xs text-[#8b6f6f] mt-2">
+              Usa solo letras, números y guiones. Ejemplo:
+              {" "}
+              <span className="font-semibold">miabella</span>
+            </p>
+
+            <div className="mt-3 rounded-2xl border border-[#ead6d6] bg-[#fff7f7] px-4 py-3 text-sm text-[#4a3535] break-all">
+              {linkRegistro || "Ingresa un slug para generar el link"}
+            </div>
+          </div>
 
           <div className="rounded-2xl border border-[#e8d5d5] px-4 py-3">
             <label className="block text-sm text-[#8b6f6f] mb-2">
@@ -349,6 +416,74 @@ export default function ConfiguracionPage() {
         </div>
       </div>
 
+      <div className="rounded-3xl bg-white border border-[#ead6d6] p-6 shadow-sm space-y-4">
+        <h2 className="text-xl font-semibold text-[#4a3535]">
+          Registro automático de clientes
+        </h2>
+
+        <p className="text-sm text-[#8b6f6f]">
+          Comparte este link para que tus clientes se registren solos y obtengan
+          su tarjeta digital.
+        </p>
+
+        <div className="rounded-2xl border border-[#ead6d6] px-4 py-3 text-sm text-[#4a3535] break-all bg-[#fff7f7]">
+          {linkRegistro || "No disponible"}
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={() => {
+              if (!linkRegistro) return;
+              navigator.clipboard.writeText(linkRegistro);
+              alert("Link copiado");
+            }}
+            className="rounded-2xl bg-[#d9aeb2] px-4 py-2 text-sm font-semibold text-white"
+          >
+            Copiar link
+          </button>
+
+          <button
+            onClick={() => {
+              if (!linkRegistro) return;
+              window.open(linkRegistro, "_blank");
+            }}
+            className="rounded-2xl border border-[#ead6d6] px-4 py-2 text-sm font-semibold text-[#4a3535]"
+          >
+            Abrir página
+          </button>
+        </div>
+      </div>
+
+      <div className="rounded-3xl bg-white border border-[#ead6d6] p-6 shadow-sm space-y-4">
+        <h2 className="text-xl font-semibold text-[#4a3535]">
+          QR para clientes
+        </h2>
+
+        <p className="text-sm text-[#8b6f6f]">
+          Genera este QR para imprimirlo y colocarlo en tu negocio. Así los
+          clientes pueden registrarse solos.
+        </p>
+
+        <div>
+          <button
+            onClick={generarQR}
+            className="rounded-2xl bg-[#4a3535] px-4 py-2 text-sm font-semibold text-white"
+          >
+            Generar QR
+          </button>
+        </div>
+
+        {qrUrl ? (
+          <div className="flex justify-center">
+            <img
+              src={qrUrl}
+              alt="QR Registro"
+              className="w-52 h-52 rounded-2xl border border-[#ead6d6] bg-white p-3"
+            />
+          </div>
+        ) : null}
+      </div>
+
       <div className="rounded-3xl bg-white border border-[#ead6d6] p-6 shadow-sm space-y-5">
         <h2 className="text-xl font-semibold text-[#4a3535]">
           Plantillas de WhatsApp
@@ -381,7 +516,8 @@ export default function ConfiguracionPage() {
               className="w-full rounded-2xl border border-[#e8d5d5] px-4 py-3 outline-none"
             />
             <p className="text-xs text-[#8b6f6f] mt-2">
-              Variables: {"{{nombre}}"}, {"{{empresa}}"}, {"{{faltan}}"}, {"{{premio}}"}
+              Variables: {"{{nombre}}"}, {"{{empresa}}"}, {"{{faltan}}"},{" "}
+              {"{{premio}}"}
             </p>
           </div>
 

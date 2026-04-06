@@ -1,42 +1,46 @@
 import { supabase } from "../../api/supabase";
 
-export async function obtenerEmpresaPorId(id: string) {
-  const { data, error } = await supabase
-    .from("empresas")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
+type EmpresaUpdate = {
+  nombre?: string | null;
+  nombre_comercial?: string | null;
+  nombre_tarjeta?: string | null;
+  telefono?: string | null;
+  color_primario?: string | null;
+  color_secundario?: string | null;
+  logo_url?: string | null;
+  icono_sello?: string | null;
+  slug?: string | null;
+};
 
-  return { data, error };
+type ConfigEmpresaUpdate = {
+  whatsapp_cumple_template?: string | null;
+  whatsapp_premio_template?: string | null;
+  whatsapp_inactivo_template?: string | null;
+};
+
+export async function obtenerEmpresaPorId(empresaId: string) {
+  return supabase
+    .from("empresas")
+    .select(
+      "id, nombre, nombre_comercial, nombre_tarjeta, telefono, color_primario, color_secundario, logo_url, icono_sello, slug"
+    )
+    .eq("id", empresaId)
+    .maybeSingle();
 }
 
 export async function actualizarEmpresa(
-  id: string,
-  data: {
-    nombre?: string;
-    nombre_comercial?: string | null;
-    nombre_tarjeta?: string | null;
-    telefono?: string | null;
-    color_primario?: string | null;
-    color_secundario?: string | null;
-    logo_url?: string | null;
-    icono_sello?: string | null;
-  }
+  empresaId: string,
+  payload: EmpresaUpdate
 ) {
-  const { error } = await supabase
-    .from("empresas")
-    .update(data)
-    .eq("id", id);
-
-  return { error };
+  return supabase.from("empresas").update(payload).eq("id", empresaId);
 }
 
 export async function subirLogoEmpresa(empresaId: string, file: File) {
-  const extension = file.name.split(".").pop() || "png";
-  const filePath = `${empresaId}/logo.${extension}`;
+  const extension = file.name.split(".").pop()?.toLowerCase() || "png";
+  const filePath = `empresas/${empresaId}/logo-${Date.now()}.${extension}`;
 
   const { error: uploadError } = await supabase.storage
-    .from("logos-empresas")
+    .from("logos")
     .upload(filePath, file, {
       upsert: true,
     });
@@ -45,73 +49,51 @@ export async function subirLogoEmpresa(empresaId: string, file: File) {
     return { data: null, error: uploadError };
   }
 
-  const { data } = supabase.storage
-    .from("logos-empresas")
-    .getPublicUrl(filePath);
+  const { data } = supabase.storage.from("logos").getPublicUrl(filePath);
 
-  return { data, error: null };
+  return {
+    data: {
+      path: filePath,
+      publicUrl: data.publicUrl,
+    },
+    error: null,
+  };
 }
 
 export async function obtenerConfiguracionEmpresa(empresaId: string) {
-  const { data, error } = await supabase
+  return supabase
     .from("configuracion_empresa")
-    .select("*")
+    .select(
+      "whatsapp_cumple_template, whatsapp_premio_template, whatsapp_inactivo_template"
+    )
     .eq("empresa_id", empresaId)
     .maybeSingle();
-
-  return { data, error };
 }
 
 export async function guardarConfiguracionEmpresa(
   empresaId: string,
-  data: {
-    whatsapp_cumple_template?: string | null;
-    whatsapp_premio_template?: string | null;
-    whatsapp_inactivo_template?: string | null;
-    icono_sello?: string | null;
-    texto_tarjeta?: string | null;
-    fondo_tarjeta_url?: string | null;
-  }
+  payload: ConfigEmpresaUpdate
 ) {
-  const { data: existente, error: errorBusqueda } = await supabase
-    .from("configuracion_empresa")
-    .select("id")
-    .eq("empresa_id", empresaId)
-    .maybeSingle();
-
-  if (errorBusqueda) {
-    return { error: errorBusqueda };
-  }
-
-  if (existente?.id) {
-    const { error } = await supabase
-      .from("configuracion_empresa")
-      .update(data)
-      .eq("empresa_id", empresaId);
-
-    return { error };
-  }
-
-  const { error } = await supabase.from("configuracion_empresa").insert([
+  return supabase.from("configuracion_empresa").upsert(
     {
       empresa_id: empresaId,
-      ...data,
+      ...payload,
     },
-  ]);
-
-  return { error };
+    {
+      onConflict: "empresa_id",
+    }
+  );
 }
 
 export function reemplazarVariablesTemplate(
-  template: string,
-  variables: Record<string, string | number | null | undefined>
+  template: string | null | undefined,
+  variables: Record<string, string | number>
 ) {
-  let resultado = template;
+  let texto = template || "";
 
-  Object.entries(variables).forEach(([clave, valor]) => {
-    const valorFinal = valor == null ? "" : String(valor);
-    resultado = resultado.replaceAll(`{{${clave}}}`, valorFinal);
+  Object.entries(variables).forEach(([key, value]) => {
+    texto = texto.replaceAll(`{{${key}}}`, String(value));
   });
 
-  return resultado;
+  return texto;
 }
